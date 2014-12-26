@@ -1,0 +1,33 @@
+{    
+    "photos": [
+        {
+            "name": "0001",
+            "position": {"x":"45","y":"34"},
+            "neighbors": [
+            ]
+        },
+        {
+            "name": "0002",
+            "position": {"x":"45","y":"34"},
+            "neighbors": [
+                {"name":"0001","cursor":[0,5,0]},
+                {"name":"0003","cursor":[0,5,0]}
+            ]
+        },
+        {
+            "name": "0003",
+            "position": {"x":"45","y":"34"},
+            "neighbors": [
+                {"name":"0002","cursor":[0,5,0]},
+                {"name":"0004","cursor":[0,5,0]}
+            ]
+        },
+        {
+            "name": "0004",
+            "position": {"x":"45","y":"34"},
+            "neighbors": [
+                {"name":"0003","cursor":[0,5,0]}
+            ]
+        }
+    ]
+}
