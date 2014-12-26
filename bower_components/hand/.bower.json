@@ -1,0 +1,34 @@
+{
+  "name": "hand",
+  "main": "hand.js",
+  "version": "0.1.2",
+  "homepage": "https://github.com/jrf0110/hand",
+  "authors": [
+    "John Fawcett <jrf0110@gmail.com>"
+  ],
+  "description": "Element grabber - attach elements to mouse movement",
+  "keywords": [
+    "element",
+    "dragging",
+    "drag",
+    "and",
+    "drop"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "0.1.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.2",
+    "commit": "ee8b6301d915db0272475927ac3afd9f2a792baa"
+  },
+  "_source": "git://github.com/jrf0110/hand.git",
+  "_target": "~0.1.2",
+  "_originalSource": "hand"
+}
