@@ -2,6 +2,7 @@
     var app = angular.module('photosphereApp', []);
     
     app.controller('PhotosphereController',function(){
-        var canvas = "";
+        this.global = {};
+        this.canvas = "";
     });
 })();

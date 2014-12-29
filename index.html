@@ -3,13 +3,19 @@
     <head>
         <meta charset="utf-8">
         <title>Photosphere</title>
-        <link href="src/css/style.css" rel="stylesheet">
+        <style>
+            html, body, div, canvas {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                overflow: hidden;
+            }
+        </style>
     </head>
     <body>
-        <div ng-controller="PhotosphereController">
-            <canvas id="renderCanvas"></canvas>
-        </div>
-        
+        <canvas id="renderCanvas" ng-controller="PhotosphereController"></canvas>
+
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
         <script src="bower_components/angular/angular.min.js"></script>
         <script src="bower_components/babylonjs/babylon.1.10.0.js"></script>
@@ -17,66 +23,135 @@
         <script src="src/js/photosphere.js"></script>
         
         <script type="text/javascript">
+            var global = {};
 
-      // Get the canvas element from our HTML below
-      var canvas = document.getElementById("renderCanvas");
 
-      // Load the BABYLON 3D engine
-      var engine = new BABYLON.Engine(canvas, true);
+            // setups normal camera
+            var setupNormalCamera = function() {
+                // This creates and positions the arc camera
+                global.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", 5, Math.PI/2, 10, new BABYLON.Vector3(0, 0, 0), global.scene);
 
-      // -------------------------------------------------------------
-      // Here begins a function that we will 'call' just after it's built
-      var createScene = function () {
+                // limiting the upper and lower bounds removes the scrollwheel behaviour
+                global.camera.lowerRadiusLimit = global.camera.radius;
+                global.camera.upperRadiusLimit = global.camera.radius;
 
-         // Now create a basic Babylon Scene object
-         var scene = new BABYLON.Scene(engine);
 
-         // Change the scene background color to green.
-         scene.clearColor = new BABYLON.Color3(0, 1, 0);
+                // This attaches the camera to the canvas
+                global.camera.attachControl(global.canvas, false);
+            };
 
-         // This creates and positions a free camera
-         var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+            // setup photosphere
+            var setupPhotoSphere = function(){
 
-         // This targets the camera to scene origin
-         camera.setTarget(BABYLON.Vector3.Zero());
+                // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
+                var sphere = BABYLON.Mesh.CreateSphere("sphere1", 32, 100, global.scene);
 
-         // This attaches the camera to the canvas
-         camera.attachControl(canvas, false);
+                global.backward = BABYLON.Mesh.CreateBox("backward", 2.0, global.scene);
+                global.backward.position = new BABYLON.Vector3(0,0,20);
 
-         // This creates a light, aiming 0,1,0 - to the sky.
-         var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+                global.forward = BABYLON.Mesh.CreateBox("forward", 2.0, global.scene);
+                global.forward.position = new BABYLON.Vector3(0,0,-20);
 
-         // Dim the light a small amount
-         light.intensity = .5;
+                // load material
+                var texture = new BABYLON.Texture("photos/0003.jpg", global.scene);
 
-         // Let's try our built-in 'sphere' shape. Params: name, subdivisions, size, scene
-         var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
+                // rotate texture
+                texture.wAng = Math.PI/-2;
 
-         // Move the sphere upward 1/2 its height
-         sphere.position.y = 1;
+                // create new material
+                var materialPhotoSphere = new BABYLON.StandardMaterial("texturePhotoSphere", global.scene);
+                materialPhotoSphere.diffuseTexture = texture;
 
-         // Let's try our built-in 'ground' shape.  Params: name, width, depth, subdivisions, scene
-         var ground = BABYLON.Mesh.CreateGround("ground1", 6, 6, 2, scene);
+                // enable backface culling
+                materialPhotoSphere.backFaceCulling = false;
+                //sphere.scaling.x = -1;
 
-         // Leave this function
-         return scene;
+                // set emissive color
+                materialPhotoSphere.emissiveColor = new BABYLON.Color3(1.0, 1.0, 1.0);
 
-      };  // End of createScene function
-      // -------------------------------------------------------------
+                // asign material to sphere
+                sphere.material = materialPhotoSphere;
 
-      // Now, call the createScene function that you just finished creating
-      var scene = createScene();
+            }
 
-      // Register a render loop to repeatedly render the scene
-      engine.runRenderLoop(function () {
-         scene.render();
-      });
+            // Init babylon
+            var setupBabylon = function() {
 
-      // Watch for browser/canvas resize events
-      window.addEventListener("resize", function () {
-         engine.resize();
-      });
+                // Get the canvas element from our HTML below
+                global.canvas = document.getElementById("renderCanvas");
 
-   </script>
+                // Load BABYLON 3D engine
+                global.engine = new BABYLON.Engine(global.canvas, true);
+
+                // This creates a basic Babylon Scene object (non-mesh)
+                global.scene = new BABYLON.Scene(global.engine);
+
+                // setup camera
+                setupNormalCamera();
+
+                // setup photosphere
+                setupPhotoSphere();
+
+                // Once the scene is loaded, just register a render loop to render it
+                global.engine.runRenderLoop(function () {
+
+                    global.scene.render();
+                });
+
+            };
+
+            // onload
+            $(document).ready(function() {
+
+                //setup babylonjs
+                setupBabylon();
+
+                $(document).on('click', 'canvas', function(event){
+                    var e = global.scene.pick(event.clientX, event.clientY);
+
+                    console.log(e.pickedMesh.name);
+
+                    if (e.pickedMesh.name == "backward") {
+                        //load another scene
+
+                        global.backward.dispose();
+                        global.forward.dispose();
+                        // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
+                        var sphere = BABYLON.Mesh.CreateSphere("sphere1", 32, 100, global.scene);
+
+                        global.backward = BABYLON.Mesh.CreateBox("backward", 2.0, global.scene);
+                        global.backward.position = new BABYLON.Vector3(20,0,0);
+
+                        global.forward = BABYLON.Mesh.CreateBox("forward", 2.0, global.scene);
+                        global.forward.position = new BABYLON.Vector3(0,0,20);
+
+
+                        // load material
+                        var texture = new BABYLON.Texture("photos/0002.jpg", global.scene);
+
+                        // rotate texture
+                        texture.wAng = Math.PI/-2;
+
+                        // create new material
+                        var materialPhotoSphere = new BABYLON.StandardMaterial("texturePhotoSphere", global.scene);
+                        materialPhotoSphere.diffuseTexture = texture;
+
+                        // enable backface culling
+                        materialPhotoSphere.backFaceCulling = false;
+                        //sphere.scaling.x = -1;
+
+                        // set emissive color
+                        materialPhotoSphere.emissiveColor = new BABYLON.Color3(1.0, 1.0, 1.0);
+
+                        // asign material to sphere
+                        sphere.material = materialPhotoSphere;
+
+
+                    }
+
+                });
+
+            });
+        </script>
     </body>
 </html>
