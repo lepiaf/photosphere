@@ -1,44 +1,21 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr"  ng-app="photosphereApp">
     <head>
         <meta charset="utf-8">
         <title>Photosphere</title>
-        <style>
-            html, body, div, canvas {
-                width: 100%;
-                height: 100%;
-                padding: 0;
-                margin: 0;
-                overflow: hidden;
-            }
-        </style>
-    </head>
-    <body>
-        <canvas id="renderCanvas"></canvas>
 
-        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <link rel="stylesheet" href="src/css/style.css" type="text/css">
+
         <script src="bower_components/babylonjs/babylon.2.0.js"></script>
         <script src="bower_components/hand/hand.js"></script>
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="bower_components/angular/angular.min.js"></script>
 
         <script src="src/js/database.js"></script>
-        <script src="src/js/photosphere.js"></script>
+        <script src="src/js/photosphereController.js"></script>
+    </head>
 
-        <script type="text/javascript">
-            // onload
-            $(document).ready(function() {
-
-                //setup babylonjs
-                setupBabylon();
-
-                $(document).on('click', 'canvas', function(event){
-                    var e = global.scene.pick(event.clientX, event.clientY);
-                    console.log(e.pickedMesh.name);
-                    if (e.pickedMesh.name.match(/move/)) {
-                        setupPhotoSphere((e.pickedMesh.name.split("_"))[1], database);
-                    }
-                });
-
-            });
-        </script>
+    <body ng-controller="photosphereController" ng-init="init()">
+        <canvas id="renderCanvas" ng-click="move($event)" ></canvas>
     </body>
 </html>
