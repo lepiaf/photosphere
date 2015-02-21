@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" ng-app="photosphereApp">
+<html lang="fr">
     <head>
         <meta charset="utf-8">
         <title>Photosphere</title>
@@ -14,113 +14,16 @@
         </style>
     </head>
     <body>
-        <canvas id="renderCanvas" ng-controller="PhotosphereController"></canvas>
+        <canvas id="renderCanvas"></canvas>
 
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
-        <script src="bower_components/angular/angular.min.js"></script>
-        <script src="bower_components/babylonjs/babylon.1.10.0.js"></script>
+        <script src="bower_components/babylonjs/babylon.2.0.js"></script>
         <script src="bower_components/hand/hand.js"></script>
 
-        <script src="src/js/photosphere.js"></script>
         <script src="src/js/database.js"></script>
+        <script src="src/js/photosphere.js"></script>
 
         <script type="text/javascript">
-            var global = {};
-
-
-            // setups normal camera
-            var setupNormalCamera = function(camera) {
-                // This creates and positions the arc camera
-                global.camera = new BABYLON.ArcRotateCamera("ArcRotateCamera", camera.alpha, camera.beta, 10, new BABYLON.Vector3(0, 0, 0), global.scene);
-
-                // limiting the upper and lower bounds removes the scrollwheel behaviour
-                global.camera.lowerRadiusLimit = global.camera.radius;
-                global.camera.upperRadiusLimit = global.camera.radius;
-
-
-                // This attaches the camera to the canvas
-                global.camera.attachControl(global.canvas, false);
-            };
-
-            // setup photosphere
-            var setupPhotoSphere = function(current, database){
-
-                // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
-                var sphere = BABYLON.Mesh.CreateSphere("sphere1", 32, 100, global.scene);
-
-                if (typeof global.moveblock != "undefined" && global.moveblock.length > 0) {
-                    $.each(global.moveblock, function (i, e) {
-
-                        e.dispose();
-                    });
-                }
-
-                global.moveblock = [];
-                $.each(findPhoto(current).neighbors, function (i, e){
-                    var moveBlock = BABYLON.Mesh.CreateBox("move_"+ e.name, 2, global.scene);
-                    moveBlock.position = new BABYLON.Vector3(e.cursor.x,e.cursor.y,e.cursor.z);
-                    moveBlock.rotation.x = 1.6;
-                    moveBlock.rotation.y = 1.6;
-
-                    var materialMoveBlock = new BABYLON.StandardMaterial("materialMoveBlock", global.scene);
-
-                    // set emissive color
-                    materialMoveBlock.emissiveColor = new BABYLON.Color3(1,.2, 3);
-                    moveBlock.material = materialMoveBlock;
-
-                    global.moveblock.push(moveBlock);
-                });
-
-
-                // load material
-                var texture = new BABYLON.Texture("photos/" + current + ".jpg", global.scene);
-
-                // rotate texture
-                texture.wAng = Math.PI/-2;
-
-                // create new material
-                var materialPhotoSphere = new BABYLON.StandardMaterial("texturePhotoSphere", global.scene);
-                materialPhotoSphere.diffuseTexture = texture;
-
-                // enable backface culling
-                materialPhotoSphere.backFaceCulling = false;
-                //sphere.scaling.x = -1;
-
-                // set emissive color
-                materialPhotoSphere.emissiveColor = new BABYLON.Color3(1.0, 1.0, 1.0);
-
-                // asign material to sphere
-                sphere.material = materialPhotoSphere;
-
-            }
-
-            // Init babylon
-            var setupBabylon = function() {
-
-                // Get the canvas element from our HTML below
-                global.canvas = document.getElementById("renderCanvas");
-
-                // Load BABYLON 3D engine
-                global.engine = new BABYLON.Engine(global.canvas, true);
-
-                // This creates a basic Babylon Scene object (non-mesh)
-                global.scene = new BABYLON.Scene(global.engine);
-
-                // setup camera
-                setupNormalCamera(findPhoto("0001").camera);
-
-                // setup photosphere
-                setupPhotoSphere("0001", database);
-
-
-                // Once the scene is loaded, just register a render loop to render it
-                global.engine.runRenderLoop(function () {
-
-                    global.scene.render();
-                });
-
-            };
-
             // onload
             $(document).ready(function() {
 
@@ -131,8 +34,6 @@
                     var e = global.scene.pick(event.clientX, event.clientY);
                     console.log(e.pickedMesh.name);
                     if (e.pickedMesh.name.match(/move/)) {
-
-
                         setupPhotoSphere((e.pickedMesh.name.split("_"))[1], database);
                     }
                 });
